@@ -12,27 +12,31 @@ import AlamofireImage
 class PhotoViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     var posts: [[String: Any]] = []
     
-
+    
+    @IBOutlet weak var date: UILabel!
+    
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         PhotoTable.delegate = self
         PhotoTable.dataSource = self
-        self.PhotoTable.rowHeight = 250
+        self.PhotoTable.rowHeight = 300
         getPhotos()
-        // Do any additional setup after loading the view.
     }
     @IBOutlet weak var PhotoTable: UITableView!
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 1
+    }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
         return posts.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "PhotoCell", for: indexPath as IndexPath) as! PhotoCell
-        let post = posts[indexPath.row]
+        let post = posts[indexPath.section]
         if let photos = post["photos"] as? [[String: Any]] {
             // 1.
             let photo = photos[0]
@@ -47,6 +51,31 @@ class PhotoViewController: UIViewController, UITableViewDataSource, UITableViewD
         return cell
     }
     
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 50))
+        headerView.backgroundColor = UIColor(white: 1, alpha: 0.9)
+        
+        let profileView = UIImageView(frame: CGRect(x: 10, y: 10, width: 30, height: 30))
+        profileView.clipsToBounds = true
+        profileView.layer.cornerRadius = 15;
+        profileView.layer.borderColor = UIColor(white: 0.7, alpha: 0.8).cgColor
+        profileView.layer.borderWidth = 1;
+        
+        // Set the avatar
+        profileView.af_setImage(withURL: URL(string: "https://api.tumblr.com/v2/blog/humansofnewyork.tumblr.com/avatar")!)
+        headerView.addSubview(profileView)
+        
+        // Add a UILabel for the date here
+        // Use the section number to get the right URL
+        // let label = ...
+        
+        return headerView
+    }
+    
+//    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+//
+//    }
+
     
     func getPhotos() {
         // Network request snippet
@@ -78,15 +107,21 @@ class PhotoViewController: UIViewController, UITableViewDataSource, UITableViewD
         // Dispose of any resources that can be recreated.
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+        let cell = sender as! UITableViewCell
+        if let indexPath = PhotoTable.indexPath(for: cell) {
+            let post = posts[indexPath.row]
+            let photoDetailsViewController = segue.destination as! PhotoDetailsViewController
+            let photos = post["photos"] as! [[String: Any]]
+            let photo = photos[0]
+            let originalSize = photo["original_size"] as! [String: Any]
+            let urlString = originalSize["url"] as! String
+            photoDetailsViewController.photoURL = urlString
+        }
     }
-    */
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        PhotoTable.deselectRow(at: indexPath, animated: true)
+    }
 
 }
