@@ -11,12 +11,6 @@ import AlamofireImage
 
 class PhotoViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     var posts: [[String: Any]] = []
-    
-    
-    @IBOutlet weak var date: UILabel!
-    
-    
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         PhotoTable.delegate = self
